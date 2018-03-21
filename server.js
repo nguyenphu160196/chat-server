@@ -13,7 +13,9 @@ mongoose.connect(config.database);
 
 const port = process.env.PORT || 9090;
 var app = express();
+var cors = require('cors');
 
+app.use(cors());
 app.use(express.static(path.join(__dirname, '/public')));
 
 app.use(history({
@@ -41,12 +43,6 @@ app.use(expressValidator({
 
 app.use('/', index);
 app.use('/api/', user);
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
-  next();
-});
+
 
 app.listen(port, () => console.log('Server is running on port ' + port));

@@ -65,8 +65,7 @@ router.post('/login', (req, res, next) => {
 	const password = req.body.password;
 
 	User.findUserByEmail(email, (err, user) => {
-		if (err) throw err;
-
+    if (err) throw err;
 		if(!user) {
 			res.json({
 				success: false,
