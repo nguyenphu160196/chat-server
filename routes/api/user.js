@@ -1,59 +1,94 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-const config = require('../../config/database');
+const verifyToken = require('../verifyToken');
+
+const config = require('../../config/config');
 const User = require('../../models/user');
+
+var multer  = require('multer')
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/avatars')   
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)      
+    }
+})
+var upload = multer({ storage: storage });
+
+//upload avatar
+router.post('/avatar/:id', upload.single('avatar'), function (req, res, next) {
+  // req.file is the `avatar` file
+  // req.body will hold the text fields, if there were any
+  User.findOne({id: req.params.id}, function(err, user) {
+    if(err) throw err;
+    if(user){
+      user.avatar = Date.now() + '-' + req.file;
+      user.save((err, result) => {
+          if(err) throw err;
+          return res.json({
+            success: true,
+            message: 'upload avatar success'
+          })
+      })
+    } 
+  })
+
+})
+
 
 // user sign up account.
 router.post('/register', function (req, res, next) {
-	// console.log(req.body);
-    var errors = {};
-    var name = req.body.name,
-    email = req.body.email,
-    password = req.body.password,
-    password2 = req.body.password2;
-
-    req.checkBody('name', 'Name field is required.').notEmpty();
-    req.checkBody('email', 'Email field is required.').notEmpty();
-    req.checkBody('email', 'Email not valid').isEmail();
-    req.checkBody('password', 'Password field is required.').notEmpty();
-    req.checkBody('password2', 'Confirm password field is required.').notEmpty();
-    req.checkBody('password2', 'Password does not match.').equals(req.body.password);
+	
+  var errors = {};
+  var name = req.body.name,
+  email = req.body.email,
+  password = req.body.password,
+  password2 = req.body.password2;
+  req.checkBody('password2', 'Password does not match.').equals(req.body.password);
 	errors = req.validationErrors();
 
 	if (errors) {
-		res.json({ success: false, errors: errors });
-        // console.log("error");
+    return res.status(401).json({ success: false, message: errors[0].msg });
 	} else {
+    
     User.findOne({email: email}, function (err, result) {
       if (err) throw err;
       if (result) {
-        return res.json({
-          success: false,
-          message: 'The Email has already been taken.',
-          name: name,
-          email: email
-        });
+        return res.status(401).json({ success: false, message: 'The Email has already been taken.' });
       } else {
-        User.create({
-          name: name,
-          email: email,
-          password: password
-        })
-        .then(function (user) {
-          let token = jwt.sign({
-            _id: user._id,
-            name: user.name
-          },
-          config.secret,
-          { expiresIn: 604800 });
-
-          return res.json({success: true, message: 'Sign up successfully', token: 'JWT '+token});
-        })
-        .catch(function (err) {
-          return next(err);
-        })
+        bcrypt.genSalt(10, function (err, satl) {
+          bcrypt.hash(password, satl)
+              .then(function (hash) {
+                User.create({
+                  name: name,
+                  email: email,
+                  password: hash,
+                  avatar: config.colorArray[Math.floor(Math.random()*50)]
+                })
+                .then(function (user) {
+                  let token = jwt.sign({
+                    id: user._id
+                  },
+                  config.secret,
+                  { expiresIn: 604800 });
+        
+                  res.status(200).json({ 
+                    uccess: true, 
+                    message: 'Sign up successfully',
+                    token: token,
+                    user: user
+                  });          
+                })
+              })
+              .catch(function () {
+                  return next(err);
+              })
+        });
       }
     });
 	}
@@ -62,237 +97,58 @@ router.post('/register', function (req, res, next) {
 // login
 router.post('/login', (req, res, next) => {
 	const email = req.body.email;
-	const password = req.body.password;
+  const password = req.body.password;
 
 	User.findUserByEmail(email, (err, user) => {
     if (err) throw err;
 		if(!user) {
-			res.json({
-				success: false,
-				message: 'User not found'
-			});
-			return;
-		}
+			return res.status(401).json({ success: false, message: 'The user not found' });
+    }
 
 		User.comparePassword(password, user.password, (err, isMatch) => {
 			if (err) throw err;
 			if (isMatch) {
 				const token = jwt.sign({
-          _id: user._id,
-          email: user.email,
-          name: user.name
+          id: user._id
         },
         config.secret,
         { expiresIn: 604800 });
 
-				res.json({
-					success: true,
-					token: 'JWT '+token,
-					user: {
-						id: user._id,
-						name: user.name,
-						email: user.email
-					}
-				});
-				return;
+				return res.status(200).json({ 
+          success: true,
+					token: token,
+					user: user
+        });
 			} else {
-				res.json({
-					success: false,
-					message: 'Wrong password'
-				});
-				return;
+				return res.status(401).json({ success: false, message: 'The password is incorrect' });
 			}
 		});
 	})
 });
 
-// search for friend
-
-router.post('/search-friend', (req, res, next) =>{
-User.find({email: {$regex:""+req.body.email}}, function(err, user){
-    if (err) throw err;
-    if (user){
-        res.json({
-          success: true,
-          message: 'Find user success!',
-          list: user
-        });
-    } else {
-      res.json({
-        success: false,
-        message: 'Find user failed!'
-      });
-      return;
-    }
-  })  
-})
-
-// invite friend
-router.post('/invite/:id', (req, res) => {
-  User.findById(req.params.id, (err, user) => {
-    if (err) throw err;
-    if(user){
-        user.invite.push({
-          fromUser: req.body.fromUser
-        });
-        user.save((err, data) => {
-          if(err) throw err;
-          res.json({
-            success: true,
-            message: "Invite user success from",
-            data: data
-          })
-        })
-    }else{
-      res.json({
-        success: false,
-        message: 'Find user failed!'
-      });
-      return;
-    }
-  })
-})
-
-//remove invite toUser
-router.post('/delete-invite/:id', (req, res) => {
-  User.findById(req.params.id, (err, user) => {
-      if(err) throw err;
-      if(user){
-        var array = user.invite;
-        for(var i=0; i<array.length ;i++){
-          if(array[i].fromUser == req.body.fromUser){
-            user.invite.splice(i,1);
-          }
-        }
-        user.save((err, data) => {
-          if (err) throw err;
-          res.json({
-            success: true,
-            message: "delete invite success",
-            data: data
-          });
-        })
-      }else{
-        res.json({
-          success: false,
-          message: 'User undefine!'
-        });
-        return;
-      }
-  })
-})
-
-//accept invite
-router.post('/accept-invite/:id', (req, res) => {
-
-  User.findById(req.body.fromUser, (err, user) => {
-    if(err) throw err;
-    if(user){
-      var array = user.invite;
-      for(var i=0; i<array.length ;i++){
-        if(array[i].fromUser == req.params.id){
-          user.invite.splice(i,1);
-        }
-      }
-      user.friends.push(req.params.id);
-      user.save(err => {
-        if (err) throw err;
-
-        User.findById(req.params.id, (err, user2) => {
-          if(err) throw err;
-          if(user2){
-            user2.friends.push(req.body.fromUser);
-            user2.save(err => {
-              if (err) throw err;
-              res.json({
-                success: true,
-                message: "accept invite",
-                own: user,
-                user2: user2
-              })
-            })
-          }else{
-            res.json({
-              success: false,
-              message: 'User undefine!'
-            });
-            return;
-          }
-        })
-
-      })
-    }else{
-      res.json({
-        success: false,
-        message: 'OwnUser undefine!'
-      });
-      return;
-    }
-  })
-
-})
-
-//delete friend
-router.post('/delete-friend/:id', (req, res) => {
-  User.findById(req.params.id, (err, user) => {
-    if (err) throw err;
-    if(user){
-      var array = user.friends;
-      for(var i=0; i<array.length;i++){
-        if(array[i] == req.body.fromUser){
-          user.friends.splice(i,1);
-        }
-      }
-      user.save(err => {
+//change status
+  router.post('/user.status', verifyToken, (req, res) => {
+      User.findById(req.userId, function(err, user){
         if(err) throw err;
-
-        User.findById(req.body.fromUser, (err, user2) => {
-          if (err) throw err;
-          if(user2) {
-            var array2 = user2.friends;
-            for(var i=0; i<array2.length;i++){
-              if(array2[i] == req.params.id){
-                user2.friends.splice(i,1);
-              }
-            }
-            user2.save(err => {
-              if (err) throw err;
-              res.json({
-                success: true,
-                message: 'delete ' + req.params.id + ' friend success!'
-              })
+        if(!user){
+          return res.status(401).json({success: false, message: "User not found"});
+        }else{
+          if(req.body.status !== undefined){
+            user.set({ status: req.body.status });
+          }
+          user.save(err => {
+            if(err) throw err;
+            return res.status(200).json({
+              success: true,
+              message: "Status have changed to " + req.body.status,
+              user: user
             })
-          }          
-        })
+          })
+        }
       })
-    }else{
-      res.json({
-        success: false,
-        message: 'OwnUser undefine!'
-      });
-      return;
-    }
   })
-})
 
-//get friends list
-router.post('/friend-list/:id', (req, res) => {
-  User.findById(req.params.id, (err, data) => {
-    if(err) throw err;
-    if(data){
-      res.json({
-        success: true,
-        message: "Get friend list success!",
-        list: data.friends
-      });
-    }else {
-      res.json({
-        success: false,
-        message: 'Find user failed!'
-      });
-      return;
-    }
-  })
-})
+
+
 
 module.exports = router;
