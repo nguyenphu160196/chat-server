@@ -10,10 +10,8 @@ const verifyToken = require('../verifyToken');
 const config = require('../../config/config');
 const User = require('../../models/user');
 
-
-//upload avatar
-var multer  = require('multer')
-var storage = multer.diskStorage({
+const multer  = require('multer')
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/avatars')   
     },
@@ -21,39 +19,7 @@ var storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.fieldname + '.' + file.mimetype.split('/')[1])      
     }
 })
-var upload = multer({ storage: storage });
-router.post('/avatar/:id', upload.single('file'), function (req, res, next) {
-  User.findOne({_id: req.params.id}, function(err, user) {
-    if(err) throw err;
-    if(user.avatar.charAt(0) != '#'){
-      fs.unlink(user.avatar, (err) => {
-        if (err) throw err;
-        user.set({ avatar: req.file.path });
-        user.save((err, result) => {
-            if(err) throw err;
-            return res.status(200).json({
-              success: true,
-              message: 'upload avatar success',
-              user: user
-            })
-        })
-      });
-    } else {
-      user.set({ avatar: req.file.path });
-      user.save((err, result) => {
-          if(err) throw err;
-          return res.status(200).json({
-            success: true,
-            message: 'upload avatar success',
-            user: user
-          })
-      })
-    }
-
-  })
-
-})
-
+const upload = multer({ storage: storage });
 
 //get avatar
 router.get('/avatar', verifyToken, (req, res) => {
@@ -176,16 +142,18 @@ router.post('/login', (req, res, next) => {
       })
   })
 
-// update email
+// change email
 router.post('/change.email', verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
       return res.status(401).json({success: false, message: "User not found"});
     }else{
-      User.comparePassword(req.body.password, user.password, (err, isMatch) => {
+      User.findUserByEmail(req.body.email, (err, email) => {
         if (err) throw err;
-        if (isMatch) {
+        if(email) {
+          return res.status(401).json({ success: false, message: 'The Email has already been taken.' });
+        }else{
           if(req.body.email !== undefined){
             user.set({ email: req.body.email });
             user.save(err => {
@@ -193,14 +161,12 @@ router.post('/change.email', verifyToken, (req, res) => {
               return res.status(200).json({
                 success: true,
                 message: "Email has changed to " + req.body.email,
-                user: user
+                email: user.email
               })
             })
           }
-        } else {
-          return res.status(401).json({ success: false, message: 'The password is incorrect' });
         }
-      });
+      })
     }
   })
 })
@@ -212,32 +178,24 @@ router.post('/change.pass', verifyToken, (req, res) => {
     if(!user){
       return res.status(401).json({success: false, message: "User not found"});
     }else{
-      User.comparePassword(req.body.oldpass, user.password, (err, isMatch) => {
-        if (err) throw err;
-        if (isMatch) {
-          if(req.body.newpass !== undefined){
-            bcrypt.genSalt(10, function (err, satl) {
-              bcrypt.hash(req.body.newpass, satl)
-                  .then(function (hash) {
-                      user.set({ password: hash });
-                      user.save(err => {
-                        if(err) throw err;
-                        return res.status(200).json({
-                          success: true,
-                          message: "Password has changed to " + req.body.newpass,
-                          user: user
-                        })
-                      })
+      if(req.body.newpass !== undefined){
+        bcrypt.genSalt(10, function (err, satl) {
+          bcrypt.hash(req.body.newpass, satl)
+              .then(function (hash) {
+                  user.set({ password: hash });
+                  user.save(err => {
+                    if(err) throw err;
+                    return res.status(200).json({
+                      success: true,
+                      message: "Password has changed to " + req.body.newpass
+                    })
                   })
-                  .catch(function (err) {
-                    console.log(err);
-                  })
-            });
-          }
-        } else {
-          return res.status(401).json({ success: false, message: 'The password is incorrect' });
-        }
-      });
+              })
+              .catch(function (err) {
+                console.log(err);
+              })
+        });
+      }
     }
   })
 })
@@ -249,26 +207,57 @@ router.post('/change.name', verifyToken, (req, res) => {
     if(!user){
       return res.status(401).json({success: false, message: "User not found"});
     }else{
-      User.comparePassword(req.body.password, user.password, (err, isMatch) => {
-        if (err) throw err;
-        if (isMatch) {
-          if(req.body.name !== undefined){
-            user.set({ name: req.body.name });
-            user.save(err => {
-              if(err) throw err;
-              return res.status(200).json({
-                success: true,
-                message: "Name has changed to " + req.body.name,
-                user: user
-              })
-            })
-          }
-        } else {
-          return res.status(401).json({ success: false, message: 'The password is incorrect' });
-        }
-      });
+      if(req.body.name !== undefined){
+        user.set({ name: req.body.name });
+        user.save(err => {
+          if(err) throw err;
+          return res.status(200).json({
+            success: true,
+            message: "Name has changed to " + req.body.name,
+            name: user.name
+          })
+        })
+      }
     }
   })
 })
+
+//upload avatar
+router.post('/avatar/:id', upload.single('file'), function (req, res) {
+  User.findOne({_id: req.params.id}, function(err, user) {
+    if(err) throw err;    
+      if(user.avatar.charAt(0) != '#'){
+        fs.unlink(user.avatar, (err) => {
+          if (err) throw err;
+        });
+      } 
+      user.set({ avatar: req.file.path });
+      user.save((err, result) => {
+          if(err) throw err;
+          return res.status(200).json({
+            success: true,
+            message: 'upload avatar success',
+            avatar: user.avatar
+          })
+      })
+    });
+  })
+
+  //check password
+  router.post('/check.pass', verifyToken, function(req, res){
+    User.findById(req.userId, function(err, user){
+      if(err) throw err;
+      if(user){
+        User.comparePassword(req.body.password, user.password, (err, isMatch) => {
+          if (err) throw err;
+          if (isMatch) {
+            return res.status(200).json({ success: false, message: 'The password is correct' });
+          }else{
+            return res.status(401).json({ success: false, message: 'The password is incorrect' });
+          }
+        })
+      }
+    })
+  })
 
 module.exports = router;
