@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
 var userSchema = new mongoose.Schema({
@@ -26,7 +27,11 @@ var userSchema = new mongoose.Schema({
     socketID: {
         type: String,
         default: ''
-    }
+    },
+    room: [{
+        type: Schema.Types.ObjectId,
+        ref: "room"
+    }]
 });
 
 userSchema.statics.comparePassword = function (candidatePassword, hashPassword, callback) {

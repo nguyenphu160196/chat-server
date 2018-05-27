@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //get avatar
-router.get('/avatar', verifyToken, (req, res) => {
+router.get('/user.avatar', verifyToken, (req, res) => {
   User.findOne({_id: req.userId}, function(err, user) {
     if(err) throw err;
     if(!user){
@@ -79,9 +79,6 @@ router.post('/register', function (req, res, next) {
                   });          
                 })
               })
-              .catch(function (err) {
-                  console.log(err);
-              })
         });
       }
     });
@@ -121,7 +118,7 @@ router.post('/login', (req, res, next) => {
 });
 
 //change status
-  router.post('/user.status', verifyToken, (req, res) => {
+  router.put('/user.status', verifyToken, (req, res) => {
       User.findById(req.userId, function(err, user){
         if(err) throw err;
         if(!user){
@@ -143,7 +140,7 @@ router.post('/login', (req, res, next) => {
   })
 
 // change email
-router.post('/change.email', verifyToken, (req, res) => {
+router.put('/user.change.email', verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -172,7 +169,7 @@ router.post('/change.email', verifyToken, (req, res) => {
 })
 
 //change password
-router.post('/change.pass', verifyToken, (req, res) => {
+router.put('/user.change.pass', verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -191,9 +188,6 @@ router.post('/change.pass', verifyToken, (req, res) => {
                     })
                   })
               })
-              .catch(function (err) {
-                console.log(err);
-              })
         });
       }
     }
@@ -201,7 +195,7 @@ router.post('/change.pass', verifyToken, (req, res) => {
 })
 
 //change name
-router.post('/change.name', verifyToken, (req, res) => {
+router.put('/user.change.name', verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -223,7 +217,7 @@ router.post('/change.name', verifyToken, (req, res) => {
 })
 
 //upload avatar
-router.post('/avatar/:id', upload.single('file'), function (req, res) {
+router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, res) {
   User.findOne({_id: req.params.id}, function(err, user) {
     if(err) throw err;    
       if(user.avatar.charAt(0) != '#'){
