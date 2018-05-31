@@ -22,8 +22,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //get avatar
-router.get('/user.avatar', verifyToken, (req, res) => {
-  User.findOne({_id: req.userId}, function(err, user) {
+router.get('/user.avatar/:id', verifyToken, (req, res) => {
+  User.findById(req.params.id, function(err, user) {
     if(err) throw err;
     if(!user){
       res.status(401).json({success: false, message: 'User not found!'});
@@ -35,7 +35,7 @@ router.get('/user.avatar', verifyToken, (req, res) => {
 })
 
 
-// user sign up account.
+// sign up account.
 router.post('/register', function (req, res, next) {
 	
   var errors = {};
@@ -250,6 +250,30 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
             return res.status(401).json({ success: false, message: 'The password is incorrect' });
           }
         })
+      }
+    })
+  })
+
+  //find user
+  router.get('/search.user/:user', verifyToken, (req, res) => {
+    User.find({name:{$regex: req.params.user}}, (err, user) => {
+      if(err) throw err;
+      if(!user){
+        return res.json({success: true, message: 'Not found!'});
+      }else{
+        return res.json({success: true, user: user});
+      }
+    })
+  })
+
+  //get user info
+  router.get('/info.user/:id', verifyToken, (req,res) => {
+    User.findById(req.params.id, (err, user) => {
+      if(err) throw err;
+      if(!user){
+        return res.json({success: true, message: 'User not found'});
+      }else{
+        return res.json({success: true, user: user});
       }
     })
   })

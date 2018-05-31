@@ -32,7 +32,7 @@ router.post('/create.room', verifyToken, (req, res) => {
                         })
                     }
                 }
-                return res.status(200).json({success: true, message: 'Create room successfully!', room: room});
+                return res.status(200).json({success: true, message: 'Create room successfully!', room: room, user: room._id});
             })
         }
     })
@@ -138,7 +138,7 @@ router.delete('/remove.room/:id', verifyToken, (req, res) => {
                     }
                     Room.remove({_id: req.params.id}, (err) => {
                         if(err) throw err;
-                        return res.status(200).json({success: true, message: 'Room have been remove!'});
+                        return res.status(200).json({success: true, message: 'Room have been remove!', user: room._id});
                     });
                 }
             })
