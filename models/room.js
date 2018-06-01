@@ -21,6 +21,10 @@ const roomSchema = new Schema({
     avatar: {
         type: String,
         default: ''
+    },
+    direct: {
+        type: Boolean,
+        default: true
     }
 });
 

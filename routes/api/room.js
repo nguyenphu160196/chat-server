@@ -18,7 +18,8 @@ router.post('/create.room', verifyToken, (req, res) => {
                 name: req.body.name,
                 owner: req.userId,
                 paticipant: req.body.paticipant,
-                avatar: config.colorArray[Math.floor(Math.random()*50)]
+                avatar: config.colorArray[Math.floor(Math.random()*50)],
+                direct: req.body.direct
             })
             .then(room => {
                 if(room.paticipant.length > 0){

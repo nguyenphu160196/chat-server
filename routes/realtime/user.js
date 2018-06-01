@@ -6,6 +6,7 @@ const io = require('socket.io')(server);
 const User = require('../../models/user');
 
 module.exports = (socket) => {	
+    socket.emit("update-socketid", socket.id);
     
     User.findById(socket.decoded.id, (err, user) => {
         if(err) throw err;
