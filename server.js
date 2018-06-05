@@ -12,6 +12,7 @@ const room = require('./routes/api/room');
 
 const userRT = require('./routes/realtime/user');
 const roomRT = require('./routes/realtime/room');
+const chatRT = require('./routes/realtime/chat');
 
 const config = require('./config/config');
 
@@ -72,7 +73,8 @@ io.use((socket, next) => {
   }    
 })
 .on('connection', userRT)
-.on('connection', roomRT);
+.on('connection', roomRT)
+.on('connection', chatRT);
 
 
 server.listen(port, () => console.log('Server is running on port ' + port));
