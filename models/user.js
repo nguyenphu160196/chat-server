@@ -31,6 +31,10 @@ var userSchema = new mongoose.Schema({
     room: [{
         type: Schema.Types.ObjectId,
         ref: "room"
+    }],
+    blacklist: [{
+        type: Schema.Types.ObjectId,
+        ref: "room"
     }]
 });
 

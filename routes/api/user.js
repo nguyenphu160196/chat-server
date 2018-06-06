@@ -69,7 +69,7 @@ router.post('/register', function (req, res, next) {
                     id: user._id
                   },
                   config.secret,
-                  { expiresIn: 604800 });
+                  { expiresIn: 259200 });
         
                   res.status(200).json({ 
                     uccess: true, 
@@ -103,7 +103,7 @@ router.post('/login', (req, res, next) => {
           id: user._id
         },
         config.secret,
-        { expiresIn: 604800 });
+        { expiresIn: 259200 });
 
 				return res.status(200).json({ 
           success: true,
@@ -274,6 +274,38 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
         return res.json({success: true, message: 'User not found'});
       }else{
         return res.json({success: true, user: user});
+      }
+    })
+  })
+
+  //add black list
+  router.put('/user.add.blacklist', verifyToken, (req, res) => {
+    User.findById(req.userId, (err, user) => {
+      if(err) throw err;
+      if(user){
+        user.blacklist.push(req.body.black);
+        user.save(err => {
+          if(err) throw err;
+          return res.status(200).json({success: true, message: 'Add backlist success', user: user}) 
+        })
+      }
+    })
+  })
+
+  //remove from black list
+  router.put('/user.add.blacklist', verifyToken, (req, res) => {
+    User.findById(req.userId, (err, user) => {
+      if(err) throw err;
+      if(user){
+        user.blacklist.map((val, i) => {
+          if(val == req.body.black){
+            user.blacklist.splice(i,1);
+            user.save(err => {
+              if(err) throw err;
+              return res.status(200).json({success: true, message: 'Add backlist success', user: user}) 
+            })
+          }
+        });
       }
     })
   })

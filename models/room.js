@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const roomSchema = new Schema({
     name: {
         type: String,
-        required: true
+        default: ''
     },
     owner: {
         type: Schema.Types.ObjectId,

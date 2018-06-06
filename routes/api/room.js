@@ -15,31 +15,23 @@ router.post('/create.room', verifyToken, (req, res) => {
             return res.status(401).json({success: false, message: 'User not found!'});
         }else{
             if(req.body.paticipant.length == 2){
-                User.findById(req.body.paticipant[0], (err, userx) => {
-                    if(err) throw err;
-                    if(userx){
-                        Room.create({
-                            name: req.body.name,
-                            owner: req.userId,
-                            paticipant: req.body.paticipant,
-                            avatar: userx.avatar,
-                            direct: req.body.direct
-                        })
-                        .then(room => {
-                            if(room.paticipant.length > 0){
-                                for(let i=0; i<room.paticipant.length;i++){
-                                    User.findById(room.paticipant[i], (err, user2) => {
-                                        if(err) throw err;
-                                        user2.room.push(room._id);
-                                        user2.save(err => {
-                                            if(err) throw err;
-                                        })
-                                    })
-                                }
-                            }
-                            return res.status(200).json({success: true, message: 'Create room successfully!', room: room, user: room._id});
-                        })
+                Room.create({
+                    owner: req.userId,
+                    paticipant: req.body.paticipant
+                })
+                .then(room => {
+                    if(room.paticipant.length > 0){
+                        for(let i=0; i<room.paticipant.length;i++){
+                            User.findById(room.paticipant[i], (err, user2) => {
+                                if(err) throw err;
+                                user2.room.push(room._id);
+                                user2.save(err => {
+                                    if(err) throw err;
+                                })
+                            })
+                        }
                     }
+                    return res.status(200).json({success: true, message: 'Create room successfully!', room: room, user: room._id});
                 })
             }else{
                 Room.create({
