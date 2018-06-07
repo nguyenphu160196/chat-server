@@ -7,6 +7,9 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
+const sticky = require('sticky-session');
+const cluster = require('cluster');
+
 const user = require('./routes/api/user');
 const room = require('./routes/api/room');
 
@@ -54,7 +57,6 @@ app.use(expressValidator({
   }
 }));
 
-
 app.get("/", (req, res) => {
   res.render('index');
 })
@@ -76,5 +78,18 @@ io.use((socket, next) => {
 .on('connection', roomRT)
 .on('connection', chatRT);
 
+// server.listen(port, () => console.log('Server is running on port ' + port));
 
-server.listen(port, () => console.log('Server is running on port ' + port));
+if(!sticky.listen(server,port))
+{
+  server.once('listening', function() {
+    console.log('Server started on port '+port);
+  });
+
+  if (cluster.isMaster) {
+    console.log('Master server started on port '+port);
+  } 
+}
+else {
+  console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
+}
