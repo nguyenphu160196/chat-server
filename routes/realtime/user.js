@@ -6,8 +6,21 @@ const io = require('socket.io')(server);
 const User = require('../../models/user');
 
 module.exports = (socket) => {	
-    socket.emit('test', 'hello');
+
+    //load room listid for client
+    socket.on('update-room-list', data => {
+        User.findById(data, (err, user) => {
+            if(err) throw err;
+            if(user){
+                socket.emit('recieve-update-room-list', user.room);
+            } 
+        })
+    })
+
+    //update socketid for client
     socket.emit("update-socketid", socket.id);
+
+    //update satus for user when they connecting
     socket.on("user-online", data => {
         User.findById(socket.decoded.id, (err, user) => {
             if(err) throw err;
@@ -20,6 +33,7 @@ module.exports = (socket) => {
         })
     })
     
+    //save new socketid
     User.findById(socket.decoded.id, (err, user) => {
         if(err) throw err;
         if(user){
@@ -30,6 +44,7 @@ module.exports = (socket) => {
         }
     })
 
+    //remove socketid
     socket.on('disconnect', () => {
         User.findById(socket.decoded.id, (err, user) => {
             if(err) throw err;

@@ -14,7 +14,7 @@ router.post('/create.room', verifyToken, (req, res) => {
         if(!user){
             return res.status(401).json({success: false, message: 'User not found!'});
         }else{
-            if(req.body.paticipant.length == 2){
+            if((req.body.paticipant.length == 2) && (req.body.direct == true)){
                 Room.create({
                     owner: req.userId,
                     paticipant: req.body.paticipant
@@ -240,6 +240,38 @@ router.put('/room.change.name/:id', verifyToken, (req, res) => {
         }
     })
 })
+
+//unlock room
+router.put('/room.unlock', verifyToken, (req, res) => {
+    User.findById(req.userId, (err, user) => {
+        if(err) throw err;
+        if(user){
+            user.blacklist.splice(user.blacklist.indexOf(req.body.room),1);
+            user.room.push(req.body.room);
+            user.save(err => {
+                if(err) throw err;
+                return res.json({success: true, room: user.room});
+            })
+        }
+    })
+})
+
+
+//hide room
+router.put('/room.hide', verifyToken, (req, res) => {
+    User.findById(req.userId, (err, user) => {
+        if(err) throw err;
+        if(user){
+                user.room.splice(user.room.indexOf(req.body.room),1);
+                user.blacklist.push(req.body.room);
+                user.save(err => {
+                    if(err) throw err;
+                    return res.json({success: true, room: user.room});
+                })
+        }
+    })
+})
+
 
 
 module.exports = router;
