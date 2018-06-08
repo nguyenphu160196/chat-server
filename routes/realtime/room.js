@@ -7,7 +7,16 @@ const Room = require('../../models/room');
 const User = require('../../models/user');
 
 module.exports = (socket) => {
-    
+    socket.on('kick-user', data => {
+        User.findById(data.user, (err, user) => {
+            if(err) throw err;
+            if(user){
+                Room.findById(data.room, (err, room) => {
+                    socket.broadcast.to(user.socketID).emit('recieve-kick-user',{room: room, user: user.room});
+                })
+            }
+        })
+    })
     //when create direct
     socket.on('update-direct-room', data => {
         User.findById(data, (err, user) => {

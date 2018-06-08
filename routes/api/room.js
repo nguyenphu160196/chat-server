@@ -273,5 +273,17 @@ router.put('/room.hide', verifyToken, (req, res) => {
 })
 
 
+router.param('id', (req,res, next, id) => {
+    Room.findById(id, (err, room) => {
+        if(err){
+            next(err);
+        }else if(room){
+            req.room = room;
+            next();
+        }else{
+            next(new Error('failed to load room'));
+        }
+    })
+  })
 
 module.exports = router;

@@ -310,4 +310,26 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
     })
   })
 
+  router.get('/user.get.room', verifyToken, (req, res) => {
+    User.findById(req.userId, (err, user) => {
+      if(err) throw err;
+      if(user){
+        return res.json({success: true, room: user.room});
+      }
+    })
+  })
+
+
+  router.param('id', (req,res, next, id) => {
+    User.findById(id, (err, user) => {
+        if(err){
+            next(err);
+        }else if(user){
+            next();
+        }else{
+            next(new Error('failed to load user'));
+        }
+    })
+  })
+
 module.exports = router;
