@@ -7,12 +7,38 @@ const Room = require('../../models/room');
 const User = require('../../models/user');
 
 module.exports = (socket) => {
+
+    socket.on('change-room-name', data => {
+        User.findById(data.id, (err, user) => {
+            if(err) throw err;
+            if(user){
+                socket.broadcast.to(user.socketID).emit('recieve-change-room-name',data.name);
+            }
+        })
+    })
+
+    socket.on('add-participant', data => {
+        User.findById(data, (err, user) => {
+            if(err) throw err;
+            if(user){
+                socket.broadcast.to(user.socketID).emit('recieve-add-participant','');
+            }
+        })
+    })
+    
     socket.on('kick-user', data => {
         User.findById(data.user, (err, user) => {
             if(err) throw err;
             if(user){
                 Room.findById(data.room, (err, room) => {
                     socket.broadcast.to(user.socketID).emit('recieve-kick-user',{room: room, user: user.room});
+                    room.paticipant.map((val, i) => {
+                        if(val != room.owner){
+                            User.findById(val, (err, user2) => {
+                                socket.broadcast.to(user2.socketID).emit('recieve-update-kick-user',{room:room, user:data.user});
+                            })
+                        }
+                    })
                 })
             }
         })
