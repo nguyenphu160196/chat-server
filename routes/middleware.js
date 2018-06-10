@@ -1,9 +1,8 @@
+const jwt = require('jsonwebtoken');
+const config = require('../config/config');
+const Room = require('../models/room')
 
-var jwt = require('jsonwebtoken');
-
-var config = require('../config/config');
-
-function verifyToken(req, res, next) {
+exports.verifyToken = function (req, res, next) {
     var token = req.headers['x-access-token'];
     if (!token){
         return res.status(403).json({ auth: false, message: 'Use must loggin to use this function' });
@@ -19,4 +18,3 @@ function verifyToken(req, res, next) {
     }
 }
 
-module.exports = verifyToken;

@@ -5,7 +5,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const verifyToken = require('../verifyToken');
+const middleware = require('../middleware');
 
 const config = require('../../config/config');
 const User = require('../../models/user');
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //get avatar
-router.get('/user.avatar/:id', verifyToken, (req, res) => {
+router.get('/user.avatar/:id', middleware.verifyToken, (req, res) => {
   User.findById(req.params.id, function(err, user) {
     if(err) throw err;
     if(!user){
@@ -118,7 +118,7 @@ router.post('/login', (req, res, next) => {
 });
 
 //change status
-  router.put('/user.status', verifyToken, (req, res) => {
+  router.put('/user.status', middleware.verifyToken, (req, res) => {
       User.findById(req.userId, function(err, user){
         if(err) throw err;
         if(!user){
@@ -140,7 +140,7 @@ router.post('/login', (req, res, next) => {
   })
 
 // change email
-router.put('/user.change.email', verifyToken, (req, res) => {
+router.put('/user.change.email', middleware.verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -169,7 +169,7 @@ router.put('/user.change.email', verifyToken, (req, res) => {
 })
 
 //change password
-router.put('/user.change.pass', verifyToken, (req, res) => {
+router.put('/user.change.pass', middleware.verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -195,7 +195,7 @@ router.put('/user.change.pass', verifyToken, (req, res) => {
 })
 
 //change name
-router.put('/user.change.name', verifyToken, (req, res) => {
+router.put('/user.change.name', middleware.verifyToken, (req, res) => {
   User.findById(req.userId, function(err, user){
     if(err) throw err;
     if(!user){
@@ -217,7 +217,7 @@ router.put('/user.change.name', verifyToken, (req, res) => {
 })
 
 //upload avatar
-router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, res) {
+router.post('/avatar/:id', [upload.single('file'), middleware.verifyToken], function (req, res) {
   User.findOne({_id: req.params.id}, function(err, user) {
     if(err) throw err;    
       if(user.avatar.charAt(0) != '#'){
@@ -238,7 +238,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
   })
 
   //check password
-  router.post('/check.pass', verifyToken, function(req, res){
+  router.post('/check.pass', middleware.verifyToken, function(req, res){
     User.findById(req.userId, function(err, user){
       if(err) throw err;
       if(user){
@@ -255,7 +255,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
   })
 
   //find user
-  router.get('/search.user/:user', verifyToken, (req, res) => {
+  router.get('/search.user/:user', middleware.verifyToken, (req, res) => {
     User.find({name:{$regex: req.params.user}}, (err, user) => {
       if(err) throw err;
       if(!user){
@@ -267,7 +267,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
   })
 
   //get user info
-  router.get('/info.user/:id', verifyToken, (req,res) => {
+  router.get('/info.user/:id', middleware.verifyToken, (req,res) => {
     User.findById(req.params.id, (err, user) => {
       if(err) throw err;
       if(!user){
@@ -279,7 +279,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
   })
 
   //add black list
-  router.put('/user.add.blacklist', verifyToken, (req, res) => {
+  router.put('/user.add.blacklist', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
       if(err) throw err;
       if(user){
@@ -293,7 +293,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
   })
 
   //remove from black list
-  router.put('/user.add.blacklist', verifyToken, (req, res) => {
+  router.put('/user.add.blacklist', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
       if(err) throw err;
       if(user){
@@ -310,7 +310,7 @@ router.post('/avatar/:id', [upload.single('file'), verifyToken], function (req, 
     })
   })
 
-  router.get('/user.get.room', verifyToken, (req, res) => {
+  router.get('/user.get.room', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
       if(err) throw err;
       if(user){

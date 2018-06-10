@@ -4,11 +4,11 @@ const config = require('../../config/config');
 
 const Room = require('../../models/room');
 const User = require('../../models/user');
-const verifyToken = require('../verifyToken');
+const middleware = require('../middleware');
 
 
 //create room
-router.post('/create.room', verifyToken, (req, res) => {
+router.post('/create.room', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -61,7 +61,7 @@ router.post('/create.room', verifyToken, (req, res) => {
 })
 
 //add participant
-router.put('/add.user.room/:id', verifyToken, (req, res) => {
+router.put('/add.user.room/:id', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -103,7 +103,7 @@ function removeA(arr) {
 }
 
 //kick user
-router.put('/kick.user/:id', verifyToken, (req, res) => {
+router.put('/kick.user/:id', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -139,7 +139,7 @@ router.put('/kick.user/:id', verifyToken, (req, res) => {
 })
 
 //remove room
-router.delete('/remove.room/:id', verifyToken, (req, res) => {
+router.delete('/remove.room/:id', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -169,36 +169,36 @@ router.delete('/remove.room/:id', verifyToken, (req, res) => {
 })
 
 //leave room
-router.put('/leave.room/:id', verifyToken, (req, res) => {
-    User.findById(req.userId, (err, user) => {
-        if(err) throw err;
-        if(!user){
-            return res.status(401).json({success: false, message: 'User not found'});
-        }else{
-            Room.findById(req.params.id, (err, room) => {
-                if(err) throw err;
-                if(!room){
-                    return res.status(401).json({success: false, message: 'Room not found'});
-                }else{
-                    removeA(room.paticipant,req.userId);
-                    removeA(user.room, room._id);
-                    room.save(err => {
-                        if(err) throw err;
-                    })
-                    user.save(err => {
-                        if(err) throw err;
-                        return res.status(200).json({success: true, message: 'Leave room successfully!', room:user.room})
-                    })
+// router.put('/leave.room/:id', middleware.verifyToken, (req, res) => {
+//     User.findById(req.userId, (err, user) => {
+//         if(err) throw err;
+//         if(!user){
+//             return res.status(401).json({success: false, message: 'User not found'});
+//         }else{
+//             Room.findById(req.params.id, (err, room) => {
+//                 if(err) throw err;
+//                 if(!room){
+//                     return res.status(401).json({success: false, message: 'Room not found'});
+//                 }else{
+//                     removeA(room.paticipant,req.userId);
+//                     removeA(user.room, room._id);
+//                     room.save(err => {
+//                         if(err) throw err;
+//                     })
+//                     user.save(err => {
+//                         if(err) throw err;
+//                         return res.status(200).json({success: true, message: 'Leave room successfully!', room:user.room})
+//                     })
 
-                }
-            })
+//                 }
+//             })
 
-        }
-    })
-})
+//         }
+//     })
+// })
 
 //get room info
-router.get('/info.room/:id', verifyToken, (req, res) => {
+router.get('/info.room/:id', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -209,7 +209,12 @@ router.get('/info.room/:id', verifyToken, (req, res) => {
                 if(!room){
                     return res.status(401).json({success: false, message: 'Room not found!'});
                 }else{
-                    return res.status(200).json({success: true, message: 'Get room info', room: room});
+                    if(room.paticipant.indexOf(req.userId) < 0){
+                        return res.status(401).json({success: false, message: 'You do not have permission!'});
+                    }else{
+                        return res.status(200).json({success: true, message: 'Get room info', room: room});
+                    }  
+                    // return res.status(200).json({success: true, message: 'Get room info', room: room});
                 }
             })
         }
@@ -217,7 +222,7 @@ router.get('/info.room/:id', verifyToken, (req, res) => {
 })
 
 //change room name
-router.put('/room.change.name/:id', verifyToken, (req, res) => {
+router.put('/room.change.name/:id', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(!user){
@@ -242,7 +247,7 @@ router.put('/room.change.name/:id', verifyToken, (req, res) => {
 })
 
 //unlock room
-router.put('/room.unlock', verifyToken, (req, res) => {
+router.put('/room.unlock', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(user){
@@ -258,7 +263,7 @@ router.put('/room.unlock', verifyToken, (req, res) => {
 
 
 //hide room
-router.put('/room.hide', verifyToken, (req, res) => {
+router.put('/room.hide', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(user){
@@ -278,7 +283,6 @@ router.param('id', (req,res, next, id) => {
         if(err){
             next(err);
         }else if(room){
-            req.room = room;
             next();
         }else{
             next(new Error('failed to load room'));
