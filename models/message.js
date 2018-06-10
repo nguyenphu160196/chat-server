@@ -11,6 +11,10 @@ const messageSchema = new Schema({
         ref: "user"
     },
     text: String,
+    seen: [{
+        type: Schema.Types.ObjectId,
+        ref: "user"
+    }],
     createAt: {
         type: Date,
         default: Date.now

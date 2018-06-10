@@ -277,8 +277,7 @@ router.put('/room.hide', middleware.verifyToken, (req, res) => {
     })
 })
 
-
-router.param('id', (req,res, next, id) => {
+router.param('id', (req, res, next, id) => {
     Room.findById(id, (err, room) => {
         if(err){
             next(err);
