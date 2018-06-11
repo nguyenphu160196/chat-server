@@ -11,6 +11,7 @@ router.get('/message.get/:id', middleware.verifyToken, (req, res) => {
     Message.find({
         roomId: req.params.id
     })
+    .sort({ 'createAt': -1 })
     .limit(10)
     .then(message => {
         return res.json({message : message});

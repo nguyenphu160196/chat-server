@@ -19,7 +19,6 @@ module.exports = (socket) => {
         let array = [];
         newMessage.save()
         .then(message => {
-            socket.emit("recieve-message", newMessage);
             recieve.map((val, i) => {
                 User.findById(val, (err, user) => {
                     if(err) throw err;

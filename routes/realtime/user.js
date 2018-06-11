@@ -25,7 +25,7 @@ module.exports = (socket) => {
                             room.paticipant.map((value, j) => {
                                 if(user._id != value){
                                     User.findById(value, (err, user2) => {
-                                        socket.broadcast.to(user2.socketID).emit('recieve-user-status-on',room._id);
+                                        socket.broadcast.to(user2.socketID).emit('recieve-user-status-on',{room: room._id, user : socket.decoded.id});
                                     })
                                 }
                             })
@@ -62,7 +62,7 @@ module.exports = (socket) => {
                             room.paticipant.map((value, j) => {
                                 if(user._id != value){
                                     User.findById(value, (err, user2) => {
-                                        socket.broadcast.to(user2.socketID).emit('recieve-user-status-off',room._id);
+                                        socket.broadcast.to(user2.socketID).emit('recieve-user-status-off',{room: room._id, user : socket.decoded.id});
                                     })
                                 }
                             })

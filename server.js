@@ -58,9 +58,19 @@ app.use(expressValidator({
   }
 }));
 
-// app.get("/", (req, res) => {
-//   res.render('index');
-// })
+app.get("/", (req, res) => {
+  res.render('index');
+})
+
+// var RateLimit = require('express-rate-limit');
+
+// var apiLimiter = new RateLimit({
+//   windowMs: 2000,
+//   max: 1,
+//   delayMs: 0
+//   });
+
+// app.use('/api/v1/message.get/:id', apiLimiter);
 
 app.use('/api/v1/', [user, room, chat]);
 
