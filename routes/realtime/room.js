@@ -18,10 +18,10 @@ module.exports = (socket) => {
     })
 
     socket.on('add-participant', data => {
-        User.findById(data.user, (err, user) => {
+        User.findById(data.who, (err, user) => {
             if(err) throw err;
-            if(user){
-                socket.broadcast.to(user.socketID).emit('recieve-add-participant',data.room);
+            if(user && user._id != data.user){
+                socket.broadcast.to(user.socketID).emit('recieve-add-participant',{ room : data.room, user: data.user });
             }
         })
     })

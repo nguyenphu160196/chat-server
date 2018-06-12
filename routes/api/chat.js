@@ -7,12 +7,10 @@ const Room = require('../../models/room');
 const User = require('../../models/user');
 const Message = require('../../models/message');
 
+
 router.get('/message.get/:id', middleware.verifyToken, (req, res) => {
-    Message.find({
-        roomId: req.params.id
-    })
-    .sort({ 'createAt': -1 })
-    .limit(10)
+    let page = req.headers['message-page'];
+    Message.paginate({roomId: req.params.id}, { page: page, limit: 20, sort:{ 'createAt': -1 }})
     .then(message => {
         return res.json({message : message});
     })

@@ -16,7 +16,6 @@ module.exports = (socket) => {
             text: data.message,
             seen: recieve
         })
-        let array = [];
         newMessage.save()
         .then(message => {
             recieve.map((val, i) => {
