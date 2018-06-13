@@ -23,8 +23,9 @@ const config = require('./config/config');
 mongoose.connect(config.database);
 
 const port = process.env.PORT || 9090;
-const app = express();
 const cors = require('cors');
+
+const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
