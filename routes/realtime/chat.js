@@ -1,10 +1,6 @@
-const express = require("express");
-const app = express();
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
-
 const User = require('../../models/user');
 const Message = require('../../models/message');
+const Room = require('../../models/room');
 
 module.exports = (socket) => {
     socket.on('client-send-message', data => {
@@ -15,6 +11,15 @@ module.exports = (socket) => {
             user: socket.decoded.id,
             text: data.message,
             seen: recieve
+        });
+        Room.findById(room, (err, room) => {
+            if(err) throw err;
+            if(room){
+                room.last = data.message;
+                room.save(err => {
+                    if(err) throw err;
+                })
+            }
         })
         newMessage.save()
         .then(message => {
@@ -22,7 +27,7 @@ module.exports = (socket) => {
                 User.findById(val, (err, user) => {
                     if(err) throw err;
                     if(user){
-                        socket.broadcast.to(user.socketID).emit("recieve-message", { room: room, message : newMessage});
+                        socket.broadcast.to(user.socketID).emit("recieve-message", { room: room, message : newMessage, last: data.message});
                     }
                 })
             })
@@ -31,5 +36,29 @@ module.exports = (socket) => {
             socket.emit("recieve-message", {errors: err});
         });
 
+    })
+    socket.on('typing', data => {
+        data.party.map((val, i) => {
+            if(val != data.user){
+                User.findById(val, (err, user) => {
+                    if(err) throw err;
+                    if(user){
+                        socket.broadcast.to(user.socketID).emit("recieve-typing", {room: data.room, user: data.user});
+                    }
+                })
+            }
+        })
+    })
+    socket.on('un-typing', data => {
+        data.party.map((val, i) => {
+            if(val != data.user){
+                User.findById(val, (err, user) => {
+                    if(err) throw err;
+                    if(user){
+                        socket.broadcast.to(user.socketID).emit("recieve-untyping", {room: data.room, user: data.user});
+                    }
+                })
+            }
+        })
     })
 }

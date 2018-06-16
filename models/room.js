@@ -25,6 +25,10 @@ const roomSchema = new Schema({
     direct: {
         type: Boolean,
         default: true
+    },
+    last: {
+        type: String,
+        default: ""
     }
 });
 

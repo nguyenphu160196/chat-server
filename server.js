@@ -17,6 +17,7 @@ const chat = require('./routes/api/chat');
 const userRT = require('./routes/realtime/user');
 const roomRT = require('./routes/realtime/room');
 const chatRT = require('./routes/realtime/chat');
+const videocallRT = require('./routes/realtime/videocall');
 
 const config = require('./config/config');
 
@@ -28,6 +29,12 @@ const cors = require('cors');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+
+const ExpressPeerServer = require('peer').ExpressPeerServer;
+const options = {
+  debug: true
+}
+const peerserver = ExpressPeerServer(server, options);
 
 app.set('view engine', 'ejs');
 app.set('views','./dist');
@@ -73,7 +80,11 @@ app.get("/", (req, res) => {
 
 // app.use('/api/v1/message.get/:id', apiLimiter);
 
-app.use('/api/v1/', [user, room, chat]);
+app.use('/api/v1/', [user, room, chat, peerserver]);
+
+peerserver.on('connection', id => {
+  console.log(id);
+});
 
 io.use((socket, next) => {
   if (socket.handshake.query && socket.handshake.query.token){
@@ -88,9 +99,12 @@ io.use((socket, next) => {
 })
 .on('connection', userRT)
 .on('connection', roomRT)
-.on('connection', chatRT);
+.on('connection', chatRT)
+.on('connection', videocallRT);
 
 server.listen(port, () => console.log('Server is running on port ' + port));
+
+
 
 // if(!sticky.listen(server,port))
 // {
@@ -105,3 +119,4 @@ server.listen(port, () => console.log('Server is running on port ' + port));
 // else {
 //   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
 // }
+
