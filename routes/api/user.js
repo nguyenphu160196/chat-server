@@ -4,13 +4,84 @@ const router = express.Router();
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const multer  = require('multer')
+const nodemailer = require('nodemailer');
 
 const middleware = require('../middleware');
 
 const config = require('../../config/config');
 const User = require('../../models/user');
 
-const multer  = require('multer')
+
+router.post('/password.fogotten', (req, res) => {
+  User.findUserByEmail(req.body.email, (err, user) => {
+    if(err) throw err;
+    if(user){  
+      
+      let token = jwt.sign({
+        id: user._id
+      },
+      config.secret,
+      { expiresIn: 1800 });
+
+      let link = 'http://localhost:8080/resetpassword/'+token;
+      
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'kltn14110901.hcmute@gmail.com',
+          pass: 'Phu161256@.,'
+        }
+      });
+
+      let mailOptions = {
+        from: 'KLTN 14110901 <support@kltn14110901.com>',
+        to: user.email,
+        subject: 'Reset Your Password!',
+        html: '<!DOCTYPE html>'
+        + '<html>'
+        + '<head>'
+        + '<style type="text/css">'
+        + '.primary-text{'
+        +    'font-family: Arial; '
+        +    'font-size: 16px;' 
+        +    'color: gray;' 
+        +    'line-height: 25px;}'            
+        + '.reset-btn{text-decoration:none;'
+        +    'color: #fff; '
+        +    'background-color: #0084ff;'
+        +    'font-family: Arial;'
+        +    'font-size: 16px;'
+        +    'border-radius: 5px;'
+        +    'padding: 15px;}'
+        +  '</style>'
+        +'</head>'
+        +'<body>'
+        +  '<div style="padding: 20px; background-color: lightgrey; color: grey; font-size: 32px; font-family: Arial; text-align: center;">Reset Your Password</div>'
+        +  '<div style="width: 50%; margin: auto; padding: 20px;">'
+        +      '<b style="color: black; font-size: 16px;">Hi '+user.name+',</b>'
+        +      '<p class="primary-text">You recently requested to reset your password for your Account. Click the button below to reset it.</p>'
+        +      '<div style="margin: 40px auto; width: 50%;"><a href="'+link+'" target="_blank" class="reset-btn">Reset Your Password</a></div>'
+        +      '<p class="primary-text">If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for next 30 minute.</p>'
+        +      '<p class="primary-text">Thanks, <br> ktnl14110901</p>'
+        +  '</div>'
+        + '</body>'
+        + '</html>'
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          return res.json({success: true, message: "Sent Email to "+user.email});
+        }
+      });
+    }else{
+      return res.status(401).json({success: false, message: 'Email not exist!'});
+    }
+  })
+})
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/avatars')   
@@ -20,7 +91,6 @@ const storage = multer.diskStorage({
     }
 })
 const upload = multer({ storage: storage });
-
 //get avatar
 router.get('/user.avatar/:id', middleware.verifyToken, (req, res) => {
   User.findById(req.params.id, function(err, user) {
@@ -217,7 +287,7 @@ router.put('/user.change.name', middleware.verifyToken, (req, res) => {
 })
 
 //upload avatar
-router.post('/avatar/:id', [upload.single('file'), middleware.verifyToken], function (req, res) {
+router.post('/avatar/:id', [middleware.verifyToken, upload.single('file')], function (req, res) {
   User.findOne({_id: req.params.id}, function(err, user) {
     if(err) throw err;    
       if(user.avatar.charAt(0) != '#'){

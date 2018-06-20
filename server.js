@@ -70,21 +70,20 @@ app.get("/", (req, res) => {
   res.render('index');
 })
 
-// var RateLimit = require('express-rate-limit');
+var RateLimit = require('express-rate-limit');
 
-// var apiLimiter = new RateLimit({
-//   windowMs: 2000,
-//   max: 1,
-//   delayMs: 0
-//   });
+var apiLimiter = new RateLimit({
+  windowMs: 15*60*1000,
+  max: 5,
+  delayMs: 0
+  });
 
-// app.use('/api/v1/message.get/:id', apiLimiter);
+app.use('/api/v1/password.fogotten', apiLimiter);
+app.use('/api/v1/login', apiLimiter);
 
 app.use('/api/v1/', [user, room, chat, peerserver]);
 
-peerserver.on('connection', id => {
-  console.log(id);
-});
+peerserver.on('connection', id => {});
 
 io.use((socket, next) => {
   if (socket.handshake.query && socket.handshake.query.token){
