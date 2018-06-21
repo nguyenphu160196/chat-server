@@ -1,3 +1,6 @@
+const jwt = require('jsonwebtoken');
+const config = require('../../config/config');
+
 const Room = require('../../models/room');
 const User = require('../../models/user');
 
@@ -5,6 +8,16 @@ module.exports = (socket) => {
 
     //update socketid for client
     socket.emit("update-socketid", socket.id);
+    
+    //update jwt
+    socket.on('request-new-jwt', data => {
+        let token = jwt.sign({
+            id: socket.decoded.id
+          },
+          config.secret,
+          { expiresIn: 259200 });
+        socket.emit('update-jwt', token);
+    });
 
     //update satus for user when they connecting
     socket.on("user-online", data => {
