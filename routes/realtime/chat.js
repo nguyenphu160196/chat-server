@@ -2,16 +2,11 @@ const User = require('../../models/user');
 const Message = require('../../models/message');
 const Room = require('../../models/room');
 
+
 module.exports = (socket) => {
     socket.on('client-send-message', data => {
         let recieve = data.recieve;
         let room = data.room;
-        let newMessage = new Message({
-            roomId: room,
-            user: socket.decoded.id,
-            text: data.message,
-            seen: recieve
-        });
         Room.findById(room, (err, room) => {
             if(err) throw err;
             if(room){
@@ -21,6 +16,13 @@ module.exports = (socket) => {
                 })
             }
         })
+        let newMessage = new Message({
+            roomId: room,
+            user: socket.decoded.id,
+            text: data.message,
+            file: data.file,
+            seen: recieve
+        });
         newMessage.save()
         .then(message => {
             recieve.map((val, i) => {
@@ -35,7 +37,6 @@ module.exports = (socket) => {
         .catch(err => {
             socket.emit("recieve-message", {errors: err});
         });
-
     })
     socket.on('typing', data => {
         data.party.map((val, i) => {

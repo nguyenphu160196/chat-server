@@ -12,6 +12,14 @@ const middleware = require('../middleware');
 const config = require('../../config/config');
 const User = require('../../models/user');
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, 'public/avatars')   
+  },
+  filename: function (req, file, cb) {
+      cb(null, Date.now() + '-' + file.fieldname + '.' + file.mimetype.split('/')[1])      
+  }
+})
 
 router.post('/password.fogotten', (req, res) => {
   User.findUserByEmail(req.body.email, (err, user) => {
@@ -82,15 +90,6 @@ router.post('/password.fogotten', (req, res) => {
   })
 })
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/avatars')   
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.fieldname + '.' + file.mimetype.split('/')[1])      
-    }
-})
-const upload = multer({ storage: storage });
 //get avatar
 router.get('/user.avatar/:id', middleware.verifyToken, (req, res) => {
   User.findById(req.params.id, function(err, user) {
@@ -287,6 +286,7 @@ router.put('/user.change.name', middleware.verifyToken, (req, res) => {
 })
 
 //upload avatar
+const upload = multer({ storage: storage });
 router.post('/avatar/:id', [middleware.verifyToken, upload.single('file')], function (req, res) {
   User.findOne({_id: req.params.id}, function(err, user) {
     if(err) throw err;    

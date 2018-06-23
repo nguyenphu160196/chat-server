@@ -66,9 +66,9 @@ app.use(expressValidator({
   }
 }));
 
-app.get("/", (req, res) => {
-  res.render('index');
-})
+// app.get("/", (req, res) => {
+//   res.render('index');
+// })
 
 var RateLimit = require('express-rate-limit');
 

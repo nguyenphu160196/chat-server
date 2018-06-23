@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer  = require('multer');
+let Promise = require('promise');
 
 const middleware = require('../middleware');
 
@@ -28,6 +30,38 @@ router.param('id', (req, res, next, id) => {
         }
     })
   })
+
+  router.get('/downloadFile/:file', (req, res) => {
+    let director = (__dirname).split('routes/api')[0];
+    res.download(director+req.params.file, req.params.file.split("-attachFile-")[0], function(err){
+      if (err) {
+        console.log(err);
+      } else {
+        // decrement a download credit, etc.
+      }
+    });
+  })
+
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'public/file')   
+        },
+        filename: function (req, file, cb) {
+            cb(null, file.originalname + '-' + file.fieldname + '-' + Date.now() + '.' + file.mimetype.split('/')[1])      
+        }
+    })
+    const attach = multer({ storage: storage }).array('attach');
+
+    router.post('/message.attach', (req, res) => {
+        attach(req, res, function (err) {
+          if (err) throw err;
+          let array = [];
+          req.files.map((val, i) => {
+            array.push(val.path);
+          })  
+          return res.json({file: array});
+        })
+      })
 
 
 module.exports = router;

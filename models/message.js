@@ -12,6 +12,7 @@ const messageSchema = new Schema({
         ref: "user"
     },
     text: String,
+    file: [],
     seen: [{
         type: Schema.Types.ObjectId,
         ref: "user"
