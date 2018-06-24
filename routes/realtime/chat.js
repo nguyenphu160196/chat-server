@@ -7,15 +7,17 @@ module.exports = (socket) => {
     socket.on('client-send-message', data => {
         let recieve = data.recieve;
         let room = data.room;
-        Room.findById(room, (err, room) => {
-            if(err) throw err;
-            if(room){
-                room.last = data.message;
-                room.save(err => {
-                    if(err) throw err;
-                })
-            }
-        })
+        if(data.message != ''){
+            Room.findById(room, (err, room) => {
+                if(err) throw err;
+                if(room){
+                    room.last = data.message;
+                    room.save(err => {
+                        if(err) throw err;
+                    })
+                }
+            })
+        }
         let newMessage = new Message({
             roomId: room,
             user: socket.decoded.id,
@@ -25,6 +27,7 @@ module.exports = (socket) => {
         });
         newMessage.save()
         .then(message => {
+            socket.emit("recieve-message", { room: room, message : newMessage, last: data.message})
             recieve.map((val, i) => {
                 User.findById(val, (err, user) => {
                     if(err) throw err;

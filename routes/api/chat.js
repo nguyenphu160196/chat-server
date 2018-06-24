@@ -32,12 +32,13 @@ router.param('id', (req, res, next, id) => {
   })
 
   router.get('/downloadFile/:file', (req, res) => {
-    let director = (__dirname).split('routes/api')[0];
-    res.download(director+req.params.file, req.params.file.split("-attachFile-")[0], function(err){
+    let director = (__dirname).split('routes/api')[0] + 'public/file/';
+    res.download(director + req.params.file, req.params.file.split("-attach-")[0], function(err){
       if (err) {
         console.log(err);
       } else {
         // decrement a download credit, etc.
+        console.log(req.params.file.split("-attach-")[0]);
       }
     });
   })
@@ -47,12 +48,12 @@ router.param('id', (req, res, next, id) => {
             cb(null, 'public/file')   
         },
         filename: function (req, file, cb) {
-            cb(null, file.originalname + '-' + file.fieldname + '-' + Date.now() + '.' + file.mimetype.split('/')[1])      
+            cb(null, file.originalname + '-' + file.fieldname + '-' + Date.now())      
         }
     })
     const attach = multer({ storage: storage }).array('attach');
 
-    router.post('/message.attach', (req, res) => {
+    router.post('/message.attach', middleware.verifyToken, (req, res) => {
         attach(req, res, function (err) {
           if (err) throw err;
           let array = [];
