@@ -42,6 +42,8 @@ app.set('views','./dist');
 app.use(cors());
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(express.static(path.join(__dirname, '/dist')));
+app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
+app.use('/files', express.static(path.join(__dirname, '/public/file/')));
 
 app.use(history({
     index: '/'
@@ -66,9 +68,9 @@ app.use(expressValidator({
   }
 }));
 
-// app.get("/", (req, res) => {
-//   res.render('index');
-// })
+app.get("/", (req, res) => {
+  res.render('index');
+})
 
 var RateLimit = require('express-rate-limit');
 
@@ -79,7 +81,7 @@ var apiLimiter = new RateLimit({
   });
 
 app.use('/api/v1/password.fogotten', apiLimiter);
-app.use('/api/v1/login', apiLimiter);
+// app.use('/api/v1/login', apiLimiter);
 
 app.use('/api/v1/', [user, room, chat, peerserver]);
 

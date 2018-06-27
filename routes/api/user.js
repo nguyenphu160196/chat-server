@@ -11,6 +11,7 @@ const middleware = require('../middleware');
 
 const config = require('../../config/config');
 const User = require('../../models/user');
+const Room = require('../../models/room');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -19,6 +20,28 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
       cb(null, Date.now() + '-' + file.fieldname + '.' + file.mimetype.split('/')[1])      
   }
+})
+
+router.get('/check.exist.direct/:id', middleware.verifyToken, (req, res) => {
+  Room.find({
+      $or: [{
+          paticipant: [req.params.id, req.userId],
+          direct: true
+      }, {
+          paticipant: [req.userId, req.params.id],
+          direct: true
+      }]
+  })  
+  .then(room => {
+    if(room.length == 0){
+      return res.status(200).json({success: true, message: 'can create room'});
+    }else{
+      return res.status(401).json({success: false, message: 'room is exist', room: room});
+    }
+  })
+  .catch(err => {
+    console.log(err);
+  })
 })
 
 router.post('/password.fogotten', (req, res) => {
