@@ -1,7 +1,7 @@
 module.exports = {
     secret: 'khoaluantotnghiepsecret',
     // database: 'mongodb://kltn_2018:kltn!!!@ds012538.mlab.com:12538/kltn_db',
-    database: 'mongodb://localhost:27017/kltn_db',
+    database: 'mongodb://127.0.0.1:27017/kltn_db',
     colorArray: ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', 
     '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
     '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', 
