@@ -20,6 +20,28 @@ module.exports = (socket) => {
         })
     })
 
+    socket.on('end-call', data => {
+        if(callstack.length != 0){
+            callstack.map((val, i) => {
+                if(val.caller == socket.decoded.id){
+                    Room.findById(val.room, (err, room) => {
+                        if(err) throw err;
+                        if(room.paticipant.length != 0){
+                            room.paticipant.map((val, i) => {
+                                if(val != socket.decoded.id){
+                                    User.findById(val, (error, user) => {
+                                        socket.broadcast.to(user.socketID).emit('recieve-end-call',false);
+                                    })
+                                }
+                            })
+                        }
+                    })
+                    callstack.splice(i, 1);
+                }
+            })
+        }
+    })
+
     socket.on('decline-call', data => {
         callstack.map((val, i) => {
             if(val.room == data.room && val.caller == data.caller){
