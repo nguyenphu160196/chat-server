@@ -36,8 +36,8 @@ const options = {
 }
 const peerserver = ExpressPeerServer(server, options);
 
-app.set('view engine', 'ejs');
-app.set('views','./dist');
+// app.set('view engine', 'ejs');
+// app.set('views','./dist');
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, '/public')));
@@ -68,9 +68,9 @@ app.use(expressValidator({
   }
 }));
 
-app.get("/", (req, res) => {
-  res.render('index');
-})
+// app.get("/", (req, res) => {
+//   res.render('index');
+// })
 
 var RateLimit = require('express-rate-limit');
 
@@ -103,21 +103,21 @@ io.use((socket, next) => {
 .on('connection', chatRT)
 .on('connection', videocallRT);
 
-server.listen(port, () => console.log('Server is running on port ' + port));
+// server.listen(port, () => console.log('Server is running on port ' + port));
 
 
 
-// if(!sticky.listen(server,port))
-// {
-//   server.once('listening', function() {
-//     console.log('Server started on port '+port);
-//   });
+if(!sticky.listen(server,port))
+{
+  server.once('listening', function() {
+    console.log('Server started on port '+port);
+  });
 
-//   if (cluster.isMaster) {
-//     console.log('Master server started on port '+port);
-//   } 
-// }
-// else {
-//   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
-// }
+  if (cluster.isMaster) {
+    console.log('Master server started on port '+port);
+  } 
+}
+else {
+  console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
+}
 
