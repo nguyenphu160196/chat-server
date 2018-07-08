@@ -107,4 +107,29 @@ module.exports = (socket) => {
             socket.broadcast.to(user.socketID).emit('recieve-update-callstack', data);
         })
     })
+
+    socket.on("offwebcam", data => {
+        data.remote = socket.decoded.id;
+        Room.findById(data.room, (err, room) => {
+            room.paticipant.map((val, i) => {
+                User.findById(val, (err, user) => {
+                    socket.broadcast.to(user.socketID).emit('recieve-offwebcam', data);
+                })
+                
+            })
+        })
+    })
+
+    socket.on("onwebcam", data => {
+        data.remote = socket.decoded.id;
+        Room.findById(data.room, (err, room) => {
+            room.paticipant.map((val, i) => {
+                User.findById(val, (err, user) => {
+                    socket.broadcast.to(user.socketID).emit('recieve-onwebcam', data);
+                })
+                
+            })
+        })
+    })
+
 }
