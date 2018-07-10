@@ -27,79 +27,75 @@ const port = process.env.PORT || 9090;
 const cors = require('cors');
 
 
-  const app = express();
-  const server = require('http').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
-  const io = require('socket.io')(server);
+const app = express();
+const server = require('http').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
+const io = require('socket.io')(server);
 
-  io.use((socket, next) => {
-    if (socket.handshake.query && socket.handshake.query.token){
-      jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
-        if(err) return next(new Error('Authentication error'));
-        socket.decoded = decoded;
-        next();
-      });
-    } else {
-        next(new Error('Authentication error'));
-    }    
-  })
-  .on('connection', userRT)
-  .on('connection', roomRT)
-  .on('connection', chatRT)
-  .on('connection', videocallRT);
+app.use(cors());
+app.use(express.static(path.join(__dirname, '/public')));
+app.use(express.static(path.join(__dirname, '/dist')));
+app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
+app.use('/files', express.static(path.join(__dirname, '/public/file/')));
 
-  const sockets = require('./sockets');
-  const getconfig = require('./config/development');
-  sockets(server, getconfig, io);
-
-  // app.set('view engine', 'ejs');
-  // app.set('views','./dist');
-  // app.get("/", (req, res) => {
-  //   res.render('index');
-  // })
-
-  app.use(cors());
-  app.use(express.static(path.join(__dirname, '/public')));
-  app.use(express.static(path.join(__dirname, '/dist')));
-  app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
-  app.use('/files', express.static(path.join(__dirname, '/public/file/')));
-
-  app.use(history({
-      index: '/'
-    }));
-
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
-  app.use(expressValidator({
-    errorFormatter: function(param, msg, value) {
-      let namespace = param.split('.')
-      , root    = namespace.shift()
-      , formParam = root;
-
-      while(namespace.length) {
-        formParam += '[' + namespace.shift() + ']';
-      }
-      return {
-        param : formParam,
-        msg   : msg,
-        value : value
-      };
-    }
+app.use(history({
+    index: '/'
   }));
 
-  let RateLimit = require('express-rate-limit');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(expressValidator({
+  errorFormatter: function(param, msg, value) {
+    let namespace = param.split('.')
+    , root    = namespace.shift()
+    , formParam = root;
 
-  let apiLimiter = new RateLimit({
-    windowMs: 15*60*1000,
-    max: 5,
-    delayMs: 0
+    while(namespace.length) {
+      formParam += '[' + namespace.shift() + ']';
+    }
+    return {
+      param : formParam,
+      msg   : msg,
+      value : value
+    };
+  }
+}));
+
+let RateLimit = require('express-rate-limit');
+
+let apiLimiter = new RateLimit({
+  windowMs: 15*60*1000,
+  max: 5,
+  delayMs: 0
+  });
+
+app.use('/api/v1/password.fogotten', apiLimiter);
+app.use('/api/v1/login', apiLimiter);
+
+app.use('/api/v1/', [user, room, chat]);
+
+io.use((socket, next) => {
+  if (socket.handshake.query && socket.handshake.query.token){
+    jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
+      if(err) return next(new Error('Authentication error'));
+      socket.decoded = decoded;
+      next();
     });
+  } else {
+      next(new Error('Authentication error'));
+  }    
+})
+.on('connection', userRT)
+.on('connection', roomRT)
+.on('connection', chatRT)
+.on('connection', videocallRT);
 
-  app.use('/api/v1/password.fogotten', apiLimiter);
-  app.use('/api/v1/login', apiLimiter);
+app.set('view engine', 'ejs');
+app.set('views','./dist');
+app.get("/", (req, res) => {
+  res.render('index');
+})
 
-  app.use('/api/v1/', [user, room, chat]);
-
-  // if(!sticky.listen(server,port))
+// if(!sticky.listen(server,port))
 // {
 //   server.once('listening', function() {
 //     console.log('Server started on port '+port);
@@ -112,3 +108,4 @@ const cors = require('cors');
 // else {
 //   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
 // }
+
