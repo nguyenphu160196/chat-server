@@ -26,88 +26,93 @@ mongoose.connect(config.database);
 const port = process.env.PORT || 9090;
 const cors = require('cors');
 
-const app = express();
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const pem = require('pem');
+pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
+  let Options = {
+    key: keys.serviceKey,
+    cert: keys.certificate
+  };
+  const app = express();
+  const server = require('https').createServer(Options, app);
+  const io = require('socket.io')(server);
 
-const ExpressPeerServer = require('peer').ExpressPeerServer;
-const options = {
-  debug: true
-}
-const peerserver = ExpressPeerServer(server, options);
 
-app.set('view engine', 'ejs');
-app.set('views','./dist');
+  const ExpressPeerServer = require('peer').ExpressPeerServer;
+  const options = {
+    debug: true
+  }
+  const peerserver = ExpressPeerServer(server, options);
 
-app.use(cors());
-app.use(express.static(path.join(__dirname, '/public')));
-app.use(express.static(path.join(__dirname, '/dist')));
-app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
-app.use('/files', express.static(path.join(__dirname, '/public/file/')));
 
-app.use(history({
-    index: '/'
+  app.set('view engine', 'ejs');
+  app.set('views','./dist');
+
+  app.use(cors());
+  app.use(express.static(path.join(__dirname, '/public')));
+  app.use(express.static(path.join(__dirname, '/dist')));
+  app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
+  app.use('/files', express.static(path.join(__dirname, '/public/file/')));
+
+  app.use(history({
+      index: '/'
+    }));
+
+  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(bodyParser.json());
+  app.use(expressValidator({
+    errorFormatter: function(param, msg, value) {
+      let namespace = param.split('.')
+      , root    = namespace.shift()
+      , formParam = root;
+
+      while(namespace.length) {
+        formParam += '[' + namespace.shift() + ']';
+      }
+      return {
+        param : formParam,
+        msg   : msg,
+        value : value
+      };
+    }
   }));
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(expressValidator({
-  errorFormatter: function(param, msg, value) {
-    let namespace = param.split('.')
-    , root    = namespace.shift()
-    , formParam = root;
+  app.get("/", (req, res) => {
+    res.render('index');
+  })
 
-    while(namespace.length) {
-      formParam += '[' + namespace.shift() + ']';
-    }
-    return {
-      param : formParam,
-      msg   : msg,
-      value : value
-    };
-  }
-}));
+  var RateLimit = require('express-rate-limit');
 
-app.get("/", (req, res) => {
-  res.render('index');
-})
-
-var RateLimit = require('express-rate-limit');
-
-var apiLimiter = new RateLimit({
-  windowMs: 15*60*1000,
-  max: 5,
-  delayMs: 0
-  });
-
-app.use('/api/v1/password.fogotten', apiLimiter);
-// app.use('/api/v1/login', apiLimiter);
-
-app.use('/api/v1/', [user, room, chat, peerserver]);
-
-peerserver.on('connection', id => {});
-
-io.use((socket, next) => {
-  if (socket.handshake.query && socket.handshake.query.token){
-    jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
-      if(err) return next(new Error('Authentication error'));
-      socket.decoded = decoded;
-      next();
+  var apiLimiter = new RateLimit({
+    windowMs: 15*60*1000,
+    max: 5,
+    delayMs: 0
     });
-  } else {
-      next(new Error('Authentication error'));
-  }    
-})
-.on('connection', userRT)
-.on('connection', roomRT)
-.on('connection', chatRT)
-.on('connection', videocallRT);
 
-server.listen(port, () => console.log('Server is running on port ' + port));
+  app.use('/api/v1/password.fogotten', apiLimiter);
+  app.use('/api/v1/login', apiLimiter);
 
+  app.use('/api/v1/', [user, room, chat, peerserver]);
 
+  peerserver.on('connection', id => {});
 
-// if(!sticky.listen(server,port))
+  io.use((socket, next) => {
+    if (socket.handshake.query && socket.handshake.query.token){
+      jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
+        if(err) return next(new Error('Authentication error'));
+        socket.decoded = decoded;
+        next();
+      });
+    } else {
+        next(new Error('Authentication error'));
+    }    
+  })
+  .on('connection', userRT)
+  .on('connection', roomRT)
+  .on('connection', chatRT)
+  .on('connection', videocallRT);
+
+  server.listen(port, () => console.log('Server is running on port ' + port));
+  // if(!sticky.listen(server,port))
 // {
 //   server.once('listening', function() {
 //     console.log('Server started on port '+port);
@@ -120,4 +125,6 @@ server.listen(port, () => console.log('Server is running on port ' + port));
 // else {
 //   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
 // }
+})
+
 
