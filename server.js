@@ -26,14 +26,10 @@ mongoose.connect(config.database);
 const port = process.env.PORT || 9090;
 const cors = require('cors');
 
-const pem = require('pem');
-pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
-  let Options = {
-    key: keys.serviceKey,
-    cert: keys.certificate
-  };
+// const pem = require('pem');
+// pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
   const app = express();
-  const server = require('https').createServer(Options, app);
+  const server = require('https').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
   const io = require('socket.io')(server);
 
 
@@ -111,7 +107,6 @@ pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
   .on('connection', chatRT)
   .on('connection', videocallRT);
 
-  server.listen(port, () => console.log('Server is running on port ' + port));
   // if(!sticky.listen(server,port))
 // {
 //   server.once('listening', function() {
@@ -125,6 +120,6 @@ pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
 // else {
 //   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
 // }
-})
+// })
 
 
