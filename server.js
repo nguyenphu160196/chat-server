@@ -29,7 +29,7 @@ const cors = require('cors');
 // const pem = require('pem');
 // pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
   const app = express();
-  const server = require('https').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
+  const server = require('http').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
   const io = require('socket.io')(server);
 
 
