@@ -26,22 +26,36 @@ mongoose.connect(config.database);
 const port = process.env.PORT || 9090;
 const cors = require('cors');
 
-// const pem = require('pem');
-// pem.createCertificate({days: 1, selfSigned: true}, function(err, keys) {
+
   const app = express();
   const server = require('http').createServer(app).listen(port, () => console.log('Server is running on port ' + port));
   const io = require('socket.io')(server);
 
+  io.use((socket, next) => {
+    if (socket.handshake.query && socket.handshake.query.token){
+      jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
+        if(err) return next(new Error('Authentication error'));
+        socket.decoded = decoded;
+        next();
+      });
+    } else {
+        next(new Error('Authentication error'));
+    }    
+  })
+  .on('connection', userRT)
+  .on('connection', roomRT)
+  .on('connection', chatRT)
+  .on('connection', videocallRT);
 
-  const ExpressPeerServer = require('peer').ExpressPeerServer;
-  const options = {
-    debug: true
-  }
-  const peerserver = ExpressPeerServer(server, options);
+  const sockets = require('./sockets');
+  const getconfig = require('./config/development');
+  sockets(server, getconfig, io);
 
-
-  app.set('view engine', 'ejs');
-  app.set('views','./dist');
+  // app.set('view engine', 'ejs');
+  // app.set('views','./dist');
+  // app.get("/", (req, res) => {
+  //   res.render('index');
+  // })
 
   app.use(cors());
   app.use(express.static(path.join(__dirname, '/public')));
@@ -72,13 +86,9 @@ const cors = require('cors');
     }
   }));
 
-  app.get("/", (req, res) => {
-    res.render('index');
-  })
+  let RateLimit = require('express-rate-limit');
 
-  var RateLimit = require('express-rate-limit');
-
-  var apiLimiter = new RateLimit({
+  let apiLimiter = new RateLimit({
     windowMs: 15*60*1000,
     max: 5,
     delayMs: 0
@@ -87,25 +97,7 @@ const cors = require('cors');
   app.use('/api/v1/password.fogotten', apiLimiter);
   app.use('/api/v1/login', apiLimiter);
 
-  app.use('/api/v1/', [user, room, chat, peerserver]);
-
-  peerserver.on('connection', id => {});
-
-  io.use((socket, next) => {
-    if (socket.handshake.query && socket.handshake.query.token){
-      jwt.verify(socket.handshake.query.token, config.secret, (err, decoded) => {
-        if(err) return next(new Error('Authentication error'));
-        socket.decoded = decoded;
-        next();
-      });
-    } else {
-        next(new Error('Authentication error'));
-    }    
-  })
-  .on('connection', userRT)
-  .on('connection', roomRT)
-  .on('connection', chatRT)
-  .on('connection', videocallRT);
+  app.use('/api/v1/', [user, room, chat]);
 
   // if(!sticky.listen(server,port))
 // {
@@ -120,6 +112,3 @@ const cors = require('cors');
 // else {
 //   console.log('- Child server started on port '+port+' case worker id='+cluster.worker.id);
 // }
-// })
-
-

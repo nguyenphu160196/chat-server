@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js start
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js remove simplewebrtc
 
 PATH: 
   /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -40,7 +40,6 @@ npm manifest:
       "mongoose-paginate": "^5.0.3",
       "multer": "^1.3.0",
       "nodemailer": "^4.6.7",
-      "peer": "^0.2.8",
       "pem": "^1.12.5",
       "promise": "^8.0.1",
       "socket.io": "^2.1.0",
@@ -283,21 +282,6 @@ Lockfile:
       raw-body "2.3.2"
       type-is "~1.6.15"
   
-  body-parser@^1.9.0:
-    version "1.18.3"
-    resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.18.3.tgz#5b292198ffdd553b3a0f20ded0592b956955c8b4"
-    dependencies:
-      bytes "3.0.0"
-      content-type "~1.0.4"
-      debug "2.6.9"
-      depd "~1.1.2"
-      http-errors "~1.6.3"
-      iconv-lite "0.4.23"
-      on-finished "~2.3.0"
-      qs "6.5.2"
-      raw-body "2.3.3"
-      type-is "~1.6.16"
-  
   boom@4.x.x:
     version "4.3.1"
     resolved "https://registry.yarnpkg.com/boom/-/boom-4.3.1.tgz#4f8a3005cb4a7e3889f749030fd25b96e01d2e31"
@@ -483,10 +467,6 @@ Lockfile:
     dependencies:
       delayed-stream "~1.0.0"
   
-  commander@~2.1.0:
-    version "2.1.0"
-    resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
-  
   component-bind@1.0.0:
     version "1.0.0"
     resolved "https://registry.yarnpkg.com/component-bind/-/component-bind-1.0.0.tgz#00c608ab7dcd93897c0009651b1d3a8e1e73bbd1"
@@ -560,12 +540,6 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.4.tgz#2bd381f2eb201020105cd50ea59da63090694686"
     dependencies:
       object-assign "^4"
-      vary "^1"
-  
-  cors@~2.5.0:
-    version "2.5.3"
-    resolved "https://registry.yarnpkg.com/cors/-/cors-2.5.3.tgz#0d70a211ec3b6cc9824e6cdc299c0630ef69c392"
-    dependencies:
       vary "^1"
   
   create-error-class@^3.0.0:
@@ -819,7 +793,7 @@ Lockfile:
       lodash "^4.16.0"
       validator "^9.4.0"
   
-  express@^4.16.2, express@^4.9.8:
+  express@^4.16.2:
     version "4.16.3"
     resolved "https://registry.yarnpkg.com/express/-/express-4.16.3.tgz#6af8a502350db3246ecc4becf6b5a34d22f7ed53"
     dependencies:
@@ -1138,15 +1112,6 @@ Lockfile:
       setprototypeof "1.0.3"
       statuses ">= 1.3.1 < 2"
   
-  http-errors@1.6.3, http-errors@~1.6.3:
-    version "1.6.3"
-    resolved "https://registry.yarnpkg.com/http-errors/-/http-errors-1.6.3.tgz#8b55680bb4be283a0b5bf4ea2e38580be1d9320d"
-    dependencies:
-      depd "~1.1.2"
-      inherits "2.0.3"
-      setprototypeof "1.1.0"
-      statuses ">= 1.4.0 < 2"
-  
   http-signature@~1.2.0:
     version "1.2.0"
     resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.2.0.tgz#9aecd925114772f3d95b65a60abb8f7c18fbace1"
@@ -1159,7 +1124,7 @@ Lockfile:
     version "0.4.19"
     resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
   
-  iconv-lite@0.4.23, iconv-lite@^0.4.4:
+  iconv-lite@^0.4.4:
     version "0.4.23"
     resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.23.tgz#297871f63be507adcfbfca715d0cd0eed84e9a63"
     dependencies:
@@ -1615,10 +1580,6 @@ Lockfile:
     version "1.2.0"
     resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
   
-  minimist@~0.0.1:
-    version "0.0.10"
-    resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
-  
   minipass@^2.2.1, minipass@^2.3.3:
     version "2.3.3"
     resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.3.3.tgz#a7dcc8b7b833f5d368759cce544dccb55f50f233"
@@ -1725,10 +1686,6 @@ Lockfile:
   nan@^2.9.2:
     version "2.10.0"
     resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
-  
-  nan@~1.0.0:
-    version "1.0.0"
-    resolved "https://registry.yarnpkg.com/nan/-/nan-1.0.0.tgz#ae24f8850818d662fcab5acf7f3b95bfaa2ccf38"
   
   nanomatch@^1.2.9:
     version "1.2.9"
@@ -1904,17 +1861,6 @@ Lockfile:
     dependencies:
       wrappy "1"
   
-  optimist@~0.6.1:
-    version "0.6.1"
-    resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
-    dependencies:
-      minimist "~0.0.1"
-      wordwrap "~0.0.2"
-  
-  options@>=0.0.5:
-    version "0.0.6"
-    resolved "https://registry.yarnpkg.com/options/-/options-0.0.6.tgz#ec22d312806bb53e731773e7cdaefcf1c643128f"
-  
   os-homedir@^1.0.0:
     version "1.0.2"
     resolved "https://registry.yarnpkg.com/os-homedir/-/os-homedir-1.0.2.tgz#ffbc4988336e0e833de0c168c7ef152121aa7fb3"
@@ -1989,16 +1935,6 @@ Lockfile:
     dependencies:
       through "~2.3"
   
-  peer@^0.2.8:
-    version "0.2.8"
-    resolved "https://registry.yarnpkg.com/peer/-/peer-0.2.8.tgz#980165ded7f9676b0b8ab32a144af06e07df3d53"
-    dependencies:
-      body-parser "^1.9.0"
-      cors "~2.5.0"
-      express "^4.9.8"
-      optimist "~0.6.1"
-      ws "~0.4.25"
-  
   pem@^1.12.5:
     version "1.12.5"
     resolved "https://registry.yarnpkg.com/pem/-/pem-1.12.5.tgz#97bf2e459537c54e0ee5b0aa11b5ca18d6b5fef2"
@@ -2065,10 +2001,6 @@ Lockfile:
     version "6.5.1"
     resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.1.tgz#349cdf6eef89ec45c12d7d5eb3fc0c870343a6d8"
   
-  qs@6.5.2:
-    version "6.5.2"
-    resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
-  
   range-parser@~1.2.0:
     version "1.2.0"
     resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
@@ -2080,15 +2012,6 @@ Lockfile:
       bytes "3.0.0"
       http-errors "1.6.2"
       iconv-lite "0.4.19"
-      unpipe "1.0.0"
-  
-  raw-body@2.3.3:
-    version "2.3.3"
-    resolved "https://registry.yarnpkg.com/raw-body/-/raw-body-2.3.3.tgz#1b324ece6b5706e153855bc1148c65bb7f6ea0c3"
-    dependencies:
-      bytes "3.0.0"
-      http-errors "1.6.3"
-      iconv-lite "0.4.23"
       unpipe "1.0.0"
   
   rc@^1.0.1, rc@^1.1.6:
@@ -2480,7 +2403,7 @@ Lockfile:
       define-property "^0.2.5"
       object-copy "^0.1.0"
   
-  "statuses@>= 1.3.1 < 2", "statuses@>= 1.4.0 < 2":
+  "statuses@>= 1.3.1 < 2":
     version "1.5.0"
     resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   
@@ -2612,10 +2535,6 @@ Lockfile:
   timed-out@^4.0.0:
     version "4.0.1"
     resolved "https://registry.yarnpkg.com/timed-out/-/timed-out-4.0.1.tgz#f32eacac5a175bea25d7fab565ab3ed8741ef56f"
-  
-  tinycolor@0.x:
-    version "0.0.1"
-    resolved "https://registry.yarnpkg.com/tinycolor/-/tinycolor-0.0.1.tgz#320b5a52d83abb5978d81a3e887d4aefb15a6164"
   
   to-array@0.1.4:
     version "0.1.4"
@@ -2801,10 +2720,6 @@ Lockfile:
     dependencies:
       string-width "^2.1.1"
   
-  wordwrap@~0.0.2:
-    version "0.0.3"
-    resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
-  
   wrappy@1:
     version "1.0.2"
     resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
@@ -2816,15 +2731,6 @@ Lockfile:
       graceful-fs "^4.1.11"
       imurmurhash "^0.1.4"
       signal-exit "^3.0.2"
-  
-  ws@~0.4.25:
-    version "0.4.32"
-    resolved "https://registry.yarnpkg.com/ws/-/ws-0.4.32.tgz#787a6154414f3c99ed83c5772153b20feb0cec32"
-    dependencies:
-      commander "~2.1.0"
-      nan "~1.0.0"
-      options ">=0.0.5"
-      tinycolor "0.x"
   
   ws@~3.3.1:
     version "3.3.3"
@@ -2859,18 +2765,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
 
 Trace: 
-  Error: Command failed.
-  Exit code: 1
-  Command: sh
-  Arguments: -c node server.js
-  Directory: /Users/thienphu/Desktop/chat-server
-  Output:
-  
-      at ProcessTermError.Error (native)
-      at ProcessTermError.MessageError (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:186:110)
-      at new ProcessTermError (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:226:113)
-      at ChildProcess.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:30281:17)
-      at emitTwo (events.js:106:13)
-      at ChildProcess.emit (events.js:191:7)
-      at maybeClose (internal/child_process.js:920:16)
-      at Process.ChildProcess._handle.onexit (internal/child_process.js:230:5)
+  Error: This module isn't specified in a manifest.
+      at MessageError.Error (native)
+      at new MessageError (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:186:110)
+      at Object.<anonymous> (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:60445:15)
+      at next (native)
+      at step (/usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:98:30)
+      at /usr/local/Cellar/yarn/1.5.1_1/libexec/lib/cli.js:109:13
