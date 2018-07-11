@@ -69,66 +69,19 @@ module.exports = (socket) => {
     })
 
     socket.on('accept-call', data => {
+        data.from = socket.decoded.id;
         callstack.map((val, i) => {
             if(val.room == data.room && val.caller == data.caller){
                 User.findById(data.caller, (err, user) => {
-                    socket.broadcast.to(user.socketID).emit('recieve-accept-call',socket.decoded.id);
+                    socket.broadcast.to(user.socketID).emit('recieve-accept-call', data);
                 })
             }
         })
     })
 
-    socket.on('connect-to-anothers', data => {
-        console.log('connect-to-anothers:'+data);
-        if(data.members.length != 0){
-            data.members.map((val, i) => {
-                User.findById(val, (err, user) => {
-                    socket.broadcast.to(user.socketID).emit('recieve-connect-to-anothers', data);
-                })
-            })
-        }
-    })
-
-    socket.on('transfer-to-next', data => {
-        console.log('transfer-to-next:'+data)
-        if(data.length != 0){
-            data.members.map((val, i) => {
-                User.findById(val, (err, user) => {
-                    if(err) throw err;
-                    socket.broadcast.to(user.socketID).emit('recieve-connect-to-anothers', data);
-                })
-            })
-        }
-    })
-
-    socket.on('update-callstack', data => {
-        console.log('update-callstack:'+data);
-        User.findById(data.caller, (err, user) => {
-            socket.broadcast.to(user.socketID).emit('recieve-update-callstack', data);
-        })
-    })
-
-    socket.on("offwebcam", data => {
-        data.remote = socket.decoded.id;
-        Room.findById(data.room, (err, room) => {
-            room.paticipant.map((val, i) => {
-                User.findById(val, (err, user) => {
-                    socket.broadcast.to(user.socketID).emit('recieve-offwebcam', data);
-                })
-                
-            })
-        })
-    })
-
-    socket.on("onwebcam", data => {
-        data.remote = socket.decoded.id;
-        Room.findById(data.room, (err, room) => {
-            room.paticipant.map((val, i) => {
-                User.findById(val, (err, user) => {
-                    socket.broadcast.to(user.socketID).emit('recieve-onwebcam', data);
-                })
-                
-            })
+    socket.on('answer-call', data => {
+        User.findById(data.from, (err, user) => {
+            socket.broadcast.to(user.socketID).emit('recieve-answer-call', data);            
         })
     })
 
