@@ -69,7 +69,7 @@ let apiLimiter = new RateLimit({
   });
 
 app.use('/api/v1/password.fogotten', apiLimiter);
-app.use('/api/v1/login', apiLimiter);
+// app.use('/api/v1/login', apiLimiter);
 
 app.use('/api/v1/', [user, room, chat]);
 

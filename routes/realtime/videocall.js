@@ -1,11 +1,13 @@
 const Room = require('../../models/room');
 const User = require('../../models/user');
+const uuidv1 = require('uuid/v1');
 
 let callstack = [];
 
 module.exports = (socket) => {
     socket.on('signal-video-call', data => {   
         callstack.push(data);
+        data.webrtc = uuidv1();
         Room.findById(data.room, (err, room) => {
             if(err) throw err;
             if(room.paticipant.length != 0){
@@ -82,6 +84,31 @@ module.exports = (socket) => {
     socket.on('answer-call', data => {
         User.findById(data.from, (err, user) => {
             socket.broadcast.to(user.socketID).emit('recieve-answer-call', data);            
+        })
+    })
+
+    socket.on('start-audio-call', data => {
+        Room.findById(data.room, (err, room) => {
+            room.paticipant.map((val, i) => {
+                User.findById(val, (error, user) => {
+                    if(val._id != socket.decoded.id){
+                        socket.broadcast.to(user.socketID).emit('recieve-start-audio-call', {id: socket.decoded.id, name: data.name, avatar: data.avatar, room: data.room});
+                    }
+                })
+            })
+        })
+    })
+
+    socket.on('end-audio-call', data => {
+        console.log(data);
+        Room.findById(data, (err, room) => {
+            room.paticipant.map((val, i) => {
+                User.findById(val, (error, user) => {
+                    if(val._id != socket.decoded.id){
+                        socket.broadcast.to(user.socketID).emit('recieve-end-audio-call', {id: socket.decoded.id, room: data});
+                    }
+                })
+            })
         })
     })
 
