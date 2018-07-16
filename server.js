@@ -33,7 +33,7 @@ const io = require('socket.io')(server);
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(express.static(path.join(__dirname, '/dist')));
+// app.use(express.static(path.join(__dirname, '/dist')));
 app.use('/images', express.static(path.join(__dirname, '/public/avatars/')));
 app.use('/files', express.static(path.join(__dirname, '/public/file/')));
 
@@ -63,13 +63,13 @@ app.use(expressValidator({
 let RateLimit = require('express-rate-limit');
 
 let apiLimiter = new RateLimit({
-  windowMs: 15*60*1000,
+  windowMs: 5*60*1000,
   max: 5,
   delayMs: 0
   });
 
 app.use('/api/v1/password.fogotten', apiLimiter);
-// app.use('/api/v1/login', apiLimiter);
+app.use('/api/v1/login', apiLimiter);
 
 app.use('/api/v1/', [user, room, chat]);
 
@@ -89,11 +89,11 @@ io.use((socket, next) => {
 .on('connection', chatRT)
 .on('connection', videocallRT);
 
-app.set('view engine', 'ejs');
-app.set('views','./dist');
-app.get("/", (req, res) => {
-  res.render('index');
-})
+// app.set('view engine', 'ejs');
+// app.set('views','./dist');
+// app.get("/", (req, res) => {
+//   res.render('index');
+// })
 
 // if(!sticky.listen(server,port))
 // {
