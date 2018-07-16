@@ -267,12 +267,14 @@ router.put('/room.hide', middleware.verifyToken, (req, res) => {
     User.findById(req.userId, (err, user) => {
         if(err) throw err;
         if(user){
-                user.room.splice(user.room.indexOf(req.body.room),1);
-                user.blacklist.push(req.body.room);
-                user.save(err => {
-                    if(err) throw err;
-                    return res.json({success: true, room: user.room});
-                })
+                if(user.room.indexOf(req.body.room) > -1 && user.blacklist.indexOf(req.body.room) == -1){
+                    user.room.splice(user.room.indexOf(req.body.room),1);
+                    user.blacklist.push(req.body.room);
+                    user.save(err => {
+                        if(err) throw err;
+                        return res.json({success: true, room: user.room});
+                    })
+                }
         }
     })
 })
