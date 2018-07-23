@@ -27,7 +27,7 @@ module.exports = (socket) => {
         });
         newMessage.save()
         .then(message => {
-            socket.emit("recieve-message", { room: room, message : newMessage, last: data.message})
+            // socket.emit("recieve-message", { room: room, message : newMessage, last: data.message})
             recieve.map((val, i) => {
                 User.findById(val, (err, user) => {
                     if(err) throw err;

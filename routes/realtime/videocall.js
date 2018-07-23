@@ -100,7 +100,6 @@ module.exports = (socket) => {
     })
 
     socket.on('end-audio-call', data => {
-        console.log(data);
         Room.findById(data, (err, room) => {
             room.paticipant.map((val, i) => {
                 User.findById(val, (error, user) => {
