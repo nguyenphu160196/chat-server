@@ -32,7 +32,7 @@ module.exports = (socket) => {
                 User.findById(val, (err, user) => {
                     if(err) throw err;
                     if(user){
-                        socket.broadcast.to(user.socketID).emit("recieve-message", { room: room, message : newMessage, last: data.message});
+                        socket.broadcast.to(user.socketID).emit("recieve-message", { room: room, message : message, last: data.message});
                     }
                 })
             })
